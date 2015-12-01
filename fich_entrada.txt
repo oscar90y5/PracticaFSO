@@ -1,6 +1,13 @@
+<<<<<<< HEAD
 aaaaa
 bbbbb
 ccccc
 ddddd
 22222
 ggggg
+=======
+eres
+una
+zorra
+mala
+>>>>>>> 1b28e82d9f4d9c65f065a1225f30d94922d66be5
