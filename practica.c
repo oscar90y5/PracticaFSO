@@ -40,13 +40,14 @@ void *productor(void *arg){
 	do{
 		tmp =fgetc (archivo);
 	//while(tmp= fgetc(archivo)!=EOF){
-		if (tmp == '\n'||tmp==EOF){
+		if (tmp == '\n'){
 			indice=0;
 			if(contador<tam-1){
 				contador++;
 			}else{
 				contador=0;
 			}
+			memset(buffer1[contador], 0,11 );
 		}else{
 			buffer1[contador][indice]=tmp;
 			indice++;
@@ -70,7 +71,8 @@ void *consumidor1 (void *arg){
 	int i=0,j=0,tmp=0;
 	char palabra[20];
 	//Coge palabra, cuantas veces?
-	while(strcmp(buffer1[i],"eof")!=0){
+	//while(strcmp(buffer1[i],"eof")!=0){
+	while(buffer1[i][0]!=(char)EOF){
 		printf("3\n");
 //		sem_wait(&datoB1);
 		if(palindromo(buffer1[i])){
