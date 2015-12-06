@@ -81,13 +81,12 @@ void *consumidor1 (void *arg){
 			sprintf(palabra,"%s no", buffer1[i]);
 		}
 //		sem_post(&espacioB1);
-		if(j<5){
-			sprintf(buffer2[j],"%s",palabra);
+		if(j<5)
 			j++;	
-		}else{
+		else
 			j=0;
-			sprintf(buffer2[j],"%s",palabra);
-		}				
+				
+		sprintf(buffer2[j],"%s",palabra);			
 		if(i<tam){
 			i++;
 		}else{
@@ -97,8 +96,33 @@ void *consumidor1 (void *arg){
 
 //	pthread_exit(0);
 	}
-	
+	if(j<5)
+		j++;
+	else
+		j=0;
+	sprintf(buffer2[j],"FIN");
 }
+
+void *consumidor2 (){
+        int i = 0;
+        char palabra[20];
+	*palabra='\0';
+	FILE *archSalida;
+	archSalida = fopen("archivo_Salida.txt","w");
+        do{
+                printf("llego");
+                sprintf(palabra,"%s",buffer2[i]);
+		printf("%s\n",palabra);
+                if(strcmp(palabra,"FIN")!=0)
+			fprintf(archSalida,"%s\n",palabra);
+                if(i<4)
+                        i++;
+                else
+                        i=0;
+        }while(strcmp(palabra,"FIN")!=0);
+	fclose(archSalida);
+}
+
 
 int main(int argc, char *argv[]){
 	int *b1;
@@ -123,6 +147,7 @@ int main(int argc, char *argv[]){
 	productor((void*) argv);
 //	pthread_create(&tid[0], NULL, productor, (void*) argv);
 	consumidor1((void*) argv);
+	consumidor2();
 //	pthread_create(&tid[1], NULL, consumidor1, (void*) argv);
 //	pthread_join(tid[0], NULL);
 //	pthread_join(tid[1],NULL);
