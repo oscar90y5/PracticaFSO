@@ -6,8 +6,9 @@
 
 char **buffer1;
 char buffer2[5][11];
-int i=0;
-int j=0;
+int x=0;
+int y=0;
+int tamFich=0;
 sem_t espacioB1;
 sem_t datoB1;
 sem_t espacioB2;
@@ -44,61 +45,56 @@ void *productor(void *arg){
 		
 		sem_wait(&espacioB1);
 		tmp = fscanf (archivo,"%s",buffer1[contador]);
+		tamFich++;
 		sem_post(&datoB1);
 		contador=(contador+1)%tam;		
 
 	}while (tmp!=EOF);
-	sem_wait(&espacioB1);
-	sprintf(buffer1[contador],"FIN");	
-	sem_post(&datoB1);
 		
-	
-	
 	pthread_exit(0);
 }
 
 void *consumidor1 (void *arg){
+	printf("hilo nuevo");
 	char ** argumentos = (char**) arg;
 	int tam = atoi(argumentos[1]);
 	int tmp=0;
 	char palabra[20];
 	//Coge palabra, cuantas veces?
 
-	while(strcmp(buffer1[i],"FIN")!=0){
+	while(tamFich!=0){
+		
 		
 		sem_wait(&datoB1);
 		sem_wait(&mutexI);
-		if(palindromo(buffer1[i])){
-			sprintf(palabra,"%s si", buffer1[i]);	
+		if(palindromo(buffer1[x])){
+			sprintf(palabra,"%s si", buffer1[x]);	
 		}else{
-			sprintf(palabra,"%s no", buffer1[i]);
+			sprintf(palabra,"%s no", buffer1[x]);
 		}
-		i=(i+1)%tam;
-		printf("i: %i\n",i);fflush(stdout);
+		x=(x+1)%tam;
+		tamFich--;
+		printf("i: %i\n",x);fflush(stdout);
 		sem_post(&mutexI);
 		sem_post(&espacioB1);
 		
 		sem_wait(&espacioB2);
 		sem_wait(&mutexJ);
-		sprintf(buffer2[j],"%s",palabra);			
-		j=(j+1)%5;
-		printf("j: %i\n",j);fflush(stdout);
+		sprintf(buffer2[y],"%s",palabra);			
+		y=(y+1)%5;
+		printf("j: %i\n",y);fflush(stdout);
 		sem_post(&mutexJ);
 		sem_post(&datoB2);
-		
-		
-		
-
-	
+			
 	}
 	sem_wait(&espacioB2);
-	i--;
-	if(i<0)
-		i=tam;
-	j--;
-	if(j<0)
-		j=5;
-	sprintf(buffer2[j],"FIN");
+	x--;
+	if(x<0)
+		x=tam;
+	y--;
+	if(y<0)
+		y=5;
+	sprintf(buffer2[y],"FIN");
 	sem_post(&datoB2);
 	printf("sale");fflush(stdout);
 	pthread_exit(0);
@@ -111,6 +107,7 @@ void *consumidor2 (){
 	FILE *archSalida;
 	archSalida = fopen("archivo_Salida.txt","w");
         do{
+		printf("petansa");
                 sem_wait(&datoB2);
                 sprintf(palabra,"%s",buffer2[i]);
 		sem_post(&espacioB2);

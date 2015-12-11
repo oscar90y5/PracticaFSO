@@ -1,7 +1,6 @@
 aaaaa si es un palindromo.
 sssss si es un palindromo.
 dddd si es un palindromo.
-fffff si es un palindromo.
 hhhh si es un palindromo.
 jjjj si es un palindromo.
 kkkkl no es un palindromo.
