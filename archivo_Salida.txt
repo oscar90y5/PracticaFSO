@@ -1,3 +1,8 @@
-jjjj si
-kkkkl no
-asfhae no
+aaaaa si es un palindromo.
+sssss si es un palindromo.
+dddd si es un palindromo.
+fffff si es un palindromo.
+hhhh si es un palindromo.
+jjjj si es un palindromo.
+kkkkl no es un palindromo.
+asfhae no es un palindromo.

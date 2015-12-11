@@ -6,14 +6,10 @@
 
 char **buffer1;
 char buffer2[5][11];
-int i=0;
-int j=0;
 sem_t espacioB1;
 sem_t datoB1;
 sem_t espacioB2;
 sem_t datoB2;
-sem_t mutexI;
-sem_t mutexJ;
 
 int palindromo (char *palabra) {
  	int esPalindromo = 1; 
@@ -38,6 +34,7 @@ void *productor(void *arg){
 	int tmp;
 	char indice=0;
 	
+	printf("%d\n", tam);
 	int contador = 0;
 	archivo = fopen(nombreFich,"r");
 	do{
@@ -45,6 +42,7 @@ void *productor(void *arg){
 		sem_wait(&espacioB1);
 		tmp = fscanf (archivo,"%s",buffer1[contador]);
 		sem_post(&datoB1);
+		printf("t%s",buffer1[contador]);
 		contador=(contador+1)%tam;		
 
 	}while (tmp!=EOF);
@@ -60,47 +58,37 @@ void *productor(void *arg){
 void *consumidor1 (void *arg){
 	char ** argumentos = (char**) arg;
 	int tam = atoi(argumentos[1]);
-	int tmp=0;
+	int i=0,j=0,tmp=0;
 	char palabra[20];
 	//Coge palabra, cuantas veces?
 
 	while(strcmp(buffer1[i],"FIN")!=0){
-		
+		printf("3\n");
 		sem_wait(&datoB1);
-		sem_wait(&mutexI);
 		if(palindromo(buffer1[i])){
 			sprintf(palabra,"%s si", buffer1[i]);	
 		}else{
 			sprintf(palabra,"%s no", buffer1[i]);
 		}
-		i=(i+1)%tam;
-		printf("i: %i\n",i);fflush(stdout);
-		sem_post(&mutexI);
 		sem_post(&espacioB1);
 		
 		sem_wait(&espacioB2);
-		sem_wait(&mutexJ);
 		sprintf(buffer2[j],"%s",palabra);			
-		j=(j+1)%5;
-		printf("j: %i\n",j);fflush(stdout);
-		sem_post(&mutexJ);
 		sem_post(&datoB2);
 		
 		
+		j=(j+1)%5;
+		i=(i+1)%tam;
 		
 
 	
 	}
 	sem_wait(&espacioB2);
-	i--;
-	if(i<0)
-		i=tam;
 	j--;
 	if(j<0)
 		j=5;
 	sprintf(buffer2[j],"FIN");
 	sem_post(&datoB2);
-	printf("sale");fflush(stdout);
 	pthread_exit(0);
 }
 
@@ -114,6 +102,7 @@ void *consumidor2 (){
                 sem_wait(&datoB2);
                 sprintf(palabra,"%s",buffer2[i]);
 		sem_post(&espacioB2);
+		printf("%s\n",palabra);
                 if(strcmp(palabra,"FIN")!=0)
 			fprintf(archSalida,"%s es un palindromo.\n",palabra);
                 i=(i+1)%5;
@@ -127,15 +116,12 @@ int main(int argc, char *argv[]){
 	int *b1;
 	int tam = atoi( argv[1]);
 	int i=0;
-	int numProd = atoi(argv[3]);
-
+	
 	sem_init(&datoB1,0,0);
 	sem_init(&espacioB1,0,tam);
 	sem_init(&datoB2,0,0);
 	sem_init(&espacioB2,0,5);
-	sem_init(&mutexI,0,1);
-	sem_init(&mutexJ,0,1);	
-
+	
 	if((buffer1=(char**)malloc(tam*sizeof(char*)))==NULL){
 		printf("ERROR al reservar memoria\n");
 		return 1;
@@ -147,14 +133,12 @@ int main(int argc, char *argv[]){
 			return 1;
 		}
 	}	
-
-	pthread_t tid[2+numProd];
+	pthread_t tid[3];
 	pthread_create(&tid[0], NULL, productor, (void*) argv);
-	pthread_create(&tid[1], NULL, consumidor2, (void*) NULL);
-	for(i=0;i<numProd;i++){
-		pthread_create(&tid[i+2], NULL, consumidor1, (void*) argv);
-	}
-	for(i=0;i<numProd+2;i++)
+	pthread_create(&tid[1], NULL, consumidor1, (void*) argv);
+	pthread_create(&tid[2], NULL, consumidor2, (void*) NULL);
+	
+	for(i=0;i<3;i++)
 		pthread_join(tid[i], NULL);
 
 	
